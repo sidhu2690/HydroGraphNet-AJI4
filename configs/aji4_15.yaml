@@ -1,0 +1,68 @@
+# Full Aji-4 15-feature HydroGraphNet recipe.
+# Default folder: ./data/aji4_flood_data_G1O
+# Override without editing this file:
+#   python train.py --data_dir /path/to/aji4_flood_data_G12O
+
+seed: 42
+
+data_dir: ./data/aji4_flood_data_G1O
+# null means "use data_dir for test.txt too".
+test_dir: null
+prefix: M80
+
+# train.txt + val.txt are pooled for optimization; test.txt remains unseen.
+train_ids_file: train.txt
+val_ids_file: val.txt
+test_ids_file: test.txt
+
+# null = every flood in the corresponding ID files.
+num_training_samples: null
+num_test_samples: null
+
+n_time_steps: 2
+k_neighbors: 4
+skip_initial_steps: auto
+delta_t: 1800.0
+mmap_cache_size: 4
+
+model:
+  # 9 static + 2 forcing (release, reservoir inflow) + 2*2 history = 15
+  input_dim_nodes: 15
+  input_dim_edges: 3
+  output_dim: 2
+  hidden_dim: 64
+  processor_size: 5
+  num_layers_node_encoder: 2
+  num_layers_edge_encoder: 2
+  num_layers_node_processor: 2
+  num_layers_edge_processor: 2
+  num_layers_node_decoder: 2
+  mlp_activation_fn: silu
+  aggregation: sum
+  do_concat_trick: true
+  # 1 lowers activation memory; 0 is fastest when VRAM is sufficient.
+  checkpoint_segments: 1
+
+batch_size: 1
+grad_accum_steps: 8
+# Full training: no artificial step or epoch cap.
+epochs: 150
+max_steps_per_epoch: null
+lr: 3.0e-4
+min_lr: 1.0e-6
+weight_decay: 1.0e-5
+scheduler: cosine
+grad_clip_norm: 1.0
+
+noise_type: random_walk
+noise_std: 0.01
+
+device: auto
+amp: true
+compile: false
+num_workers: 4
+
+ckpt_dir: ./checkpoints_aji4_15
+output_dir: ./outputs_aji4_15
+val_every_epochs: 5
+num_test_time_steps: 60
