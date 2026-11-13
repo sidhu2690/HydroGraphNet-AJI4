@@ -311,7 +311,7 @@ class HydroGraphDataset(Dataset):
             for hid in ids:
                 if hid in seen:
                     continue
-                if (self.data_dir / f"{self.prefix}_WD_{hid}.txt").is_file():
+                if (self.data_dir / f"{self.prefix}_WD_{hid}.txt").is_file() or all(cp.is_file() for cp in self._cache_paths(hid).values()):
                     seen.add(hid)
                     out.append(hid)
             if not out:
